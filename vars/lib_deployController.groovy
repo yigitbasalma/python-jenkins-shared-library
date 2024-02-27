@@ -103,7 +103,7 @@ def compose(Map config, String image, Map r_config, String containerRepository) 
 
     sshagent(credentials: [config.remoteHostCredentialID]) {
       sh """
-      ssh -o StrictHostKeyChecking=no ${config.remoteUser}@${config.remoteHost} -c 'mkdir /opt/docker-compose-${config.b_config.project.name}'
+      ssh -o StrictHostKeyChecking=no ${config.remoteUser}@${config.remoteHost} 'mkdir /opt/docker-compose-${config.b_config.project.name}'
       """
 
       sh """
