@@ -121,21 +121,6 @@ def call(Map config) {
                 }
             }
 
-            stage("Build Project") {
-                when {
-                    expression {
-                        return config.b_config.controllers.buildController
-                    }
-                }
-                steps {
-                    script {
-                        lib_buildController(
-                            config
-                        )
-                    }
-                }
-            }
-
             stage("Build and Publish as a Container") {
                 when {
                     expression {
