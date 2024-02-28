@@ -119,3 +119,15 @@ EOF
       """
     }
 }
+
+def runCommand(Map config, String image, Map r_config, String containerRepository) {
+    def command = r_config.command.replace("{image}", image)
+
+    sshagent(credentials: [config.remoteHostCredentialID]) {
+      sh """
+      ssh -o StrictHostKeyChecking=no ${config.remoteUser}@${config.remoteHost} << EOF
+${command}
+EOF
+      """
+    }
+}
