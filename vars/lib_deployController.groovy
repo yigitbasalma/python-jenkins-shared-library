@@ -121,7 +121,7 @@ EOF
 }
 
 def runCommand(Map config, String image, Map r_config, String containerRepository) {
-    def command = r_config.command.replace("{image}", image)
+    def command = r_config.command.replace("{image}", "${containerRepository}/${config.b_config.project.name}:${image}")
 
     sshagent(credentials: [config.remoteHostCredentialID]) {
       sh """
