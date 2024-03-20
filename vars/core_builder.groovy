@@ -1,5 +1,9 @@
 def call(Map config) {
 
+    if ( config.containsKey("github_hook") && config.github_hook ) {
+        properties([pipelineTriggers([githubPush()])])
+    }
+
     pipeline {
         agent {label config.agent}
 
