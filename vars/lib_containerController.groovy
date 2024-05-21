@@ -44,7 +44,7 @@ def call(Map config) {
                 stage("Building ${repoName}") {
                     script {
                         try {
-                            withCredentials([[$class:"UsernamePasswordMultiBinding", credentialsId: "container-artifact-registry", usernameVariable: "USERNAME", passwordVariable: "PASSWORD"]]) {
+                            withCredentials([[$class:"UsernamePasswordMultiBinding", credentialsId: config.containsKey('registry_cred_name') ? config.registry_cred_name : "container-artifact-registry", usernameVariable: "USERNAME", passwordVariable: "PASSWORD"]]) {
                                 sh """
                                 docker login --username $USERNAME --password $PASSWORD ${container_repository}
                                 docker build --rm  \
