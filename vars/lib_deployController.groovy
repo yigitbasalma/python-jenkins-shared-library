@@ -18,7 +18,7 @@ def call(Map config) {
 def argocd(Map config, String image, Map r_config, String containerRepository) {
     path = "${r_config.path.replace('/{environment}', '')}/{environment}"
 
-    if ( config.scope == "branch" ) {
+    if ( config.containsKey("branch_build") ) {
         path = "${r_config.path}/branch/${config.target_branch}"
     }
 
@@ -36,8 +36,47 @@ def argocd(Map config, String image, Map r_config, String containerRepository) {
         && config.b_config.argocd[config.environment].autoSync) {
 
         withCredentials([string(credentialsId: config.b_config.argocd[config.environment].tokenID, variable: 'TOKEN')]) {
+            def appName = path.split('/')[1]
+            def appNamespace = path.split('/')[0]
+
+            if ( r_config.containsKey("alias") ) {
+                appName = r_config.alias
+            }
+
+            if ( r_config.containsKey("namespace") ) {
+                appNamespace = r_config.namespace
+            }
+
+            def appExists = sh(
+                script: """#!/bin/bash
+                argocd app get ${appName} \
+                    --insecure \
+                    --grpc-web \
+                    --server ${config.b_config.argocd[config.environment].url} \
+                    --auth-token $TOKEN > /dev/null 2>&1 || echo false
+                """,
+                returnStdout: true
+            ).trim()
+
+            if ( appExists == "false" ) {
+                sh """#!/bin/bash
+                argocd app create ${appName} \
+                    --repo ${r_config.repo} \
+                    --path ${path.replace('{environment}', config.environment)} \
+                    --dest-namespace ${appNamespace} \
+                    --project ${appNamespace} \
+                    --dest-server https://kubernetes.default.svc \
+                    --directory-recurse \
+                    --sync-policy automated \
+                    --insecure \
+                    --grpc-web \
+                    --server ${config.b_config.argocd[config.environment].url} \
+                    --auth-token $TOKEN
+                """
+            }
+
             sh """#!/bin/bash
-            argocd app sync ${path.split('/')[1]} \
+            argocd app sync ${appName} \
                 --force \
                 --insecure \
                 --grpc-web \
