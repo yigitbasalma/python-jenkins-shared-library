@@ -81,7 +81,7 @@ def call(Map config) {
         // Environments
         def repoName = it.name
 
-        withCredentials([[$class:"UsernamePasswordMultiBinding", credentialsId: "container-artifact-registry", usernameVariable: "USERNAME", passwordVariable: "PASSWORD"]]) {
+        withCredentials([[$class:"UsernamePasswordMultiBinding", credentialsId: config.containsKey('registry_cred_name') ? config.registry_cred_name : "container-artifact-registry", usernameVariable: "USERNAME", passwordVariable: "PASSWORD"]]) {
             sh """
             docker login --username $USERNAME --password $PASSWORD ${container_repository}
                 docker push ${container_repository}/${repoName.toLowerCase()}:${config.b_config.imageLatestTag} && \
